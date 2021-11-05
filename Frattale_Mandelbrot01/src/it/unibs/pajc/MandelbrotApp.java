@@ -5,10 +5,13 @@ import java.awt.EventQueue;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
 
 public class MandelbrotApp {
 
 	private JFrame frame;
+	public Mandelbrot model;
+	private MandelbrotPnl pnlMandelbrot;
 
 	/**
 	 * Launch the application.
@@ -30,9 +33,19 @@ public class MandelbrotApp {
 	 * Create the application.
 	 */
 	public MandelbrotApp() {
+		model = new Mandelbrot();
+		model.addChangeListener(this::modelUpdated);    //si mette in ascolto degli eventi del model stesso
+		
 		initialize();
 	}
 
+	/*
+	 * Una volta che viene comunicato che i dati sono stati modificati allora viene detto alla view di ridisegnarsi.
+	 */
+	public void modelUpdated(ChangeEvent e) {
+		pnlMandelbrot.setData(model.getData());
+	}
+	
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -41,7 +54,7 @@ public class MandelbrotApp {
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		MandelbrotPnl pnlMandelbrot = new MandelbrotPnl();
+		pnlMandelbrot = new MandelbrotPnl();
 		frame.getContentPane().add(pnlMandelbrot, BorderLayout.CENTER);
 		
 		JPanel panel = new JPanel();
@@ -56,14 +69,14 @@ public class MandelbrotApp {
 		panel.add(btnNewButton);
 		
 		btnNewButton.addActionListener(e -> {
-			pnlMandelbrot.model.eval(new Rectangle2D.Double(-2, -1, 3, 2), 100);
-			pnlMandelbrot.repaint();
+			model.eval(new Rectangle2D.Double(-2, -1, 3, 2), 100);
+			//pnlMandelbrot.repaint();
 		});
 		
 		
 		slider.addChangeListener(e -> {
-			pnlMandelbrot.model.eval(new Rectangle2D.Double(-2, -1, 3, 2), 100);
-			pnlMandelbrot.repaint();
+			model.eval(new Rectangle2D.Double(-2, -1, 3, 2), slider.getValue());
+			//pnlMandelbrot.repaint();
 		});
 	}
 

@@ -5,7 +5,7 @@ import java.awt.geom.Rectangle2D;
 /*
  * classe che rappresenta il model
  */
-public class Mandelbrot {
+public class Mandelbrot extends BaseModel{
 	
 	/*
 	 * matrice che memorizza se il tal punto fa confergere la successione o no
@@ -39,7 +39,7 @@ public class Mandelbrot {
 				data[i][j] = fMandelbrot(new Complex(j * dx + xmin, i * dy + ymin));
 			}
 		}
-		
+		fireValuesChange();
 	}
 	
 	/*
@@ -48,7 +48,20 @@ public class Mandelbrot {
 	 * 
 	 */
 	double fMandelbrot(Complex c) {
-		return 0;
+		Complex f = new Complex(0, 0);
+
+        for (int iterations = 100; iterations >= 0; iterations--) {
+            f = f.sqr().sum(c);
+
+            /*
+             * Se è maggiore di questo numero piccolopiccolopiccolo,
+             * allora non converge.
+             */
+            if (f.module2() > 1e5) {
+                return iterations;
+            }
+        }
+        return 0;
 	}
 	
 	/*

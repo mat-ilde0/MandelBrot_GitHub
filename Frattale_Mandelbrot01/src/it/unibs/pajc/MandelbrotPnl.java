@@ -8,8 +8,12 @@ import javax.swing.JPanel;
 
 public class MandelbrotPnl extends JPanel {
 	
-	Mandelbrot model = new Mandelbrot();
-
+	private double data[][];
+	public void setData(double data[][]) {
+		this.data = data;
+		repaint();
+	}
+	
 	/**
 	 * Create the panel.
 	 */
@@ -21,19 +25,18 @@ public class MandelbrotPnl extends JPanel {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D)g;
 		
-		if(model.getData() == null)
+		if(data == null)
 			return;
-		
-		double data[][] = model.getData();
 		
 		//ricavo il numero di elementi contenuti nella matrice
 		int sx = data.length;      
 		int sy = data[0].length;
 		
 		/*
-		 * trasformazione di scala :
+		 * trasformazione di scala.
+		 * 
 		 */
-		g2.scale(getWidth()/sx,  getHeight()/sy);
+		g2.scale((double)getWidth()/sx,  (double)getHeight()/sy);
 		
 		//disegno array
 		double vmax = data[0][0];
