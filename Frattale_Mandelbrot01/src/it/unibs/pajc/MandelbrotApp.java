@@ -78,6 +78,9 @@ public class MandelbrotApp {
 			model.eval(new Rectangle2D.Double(-2, -1, 3, 2), slider.getValue());
 			//pnlMandelbrot.repaint();
 		});
+		
+		pnlMandelbrot.addPropertyChangeListener(MandelbrotPnl.VIEWPORT, e -> 
+			model.eval(pnlMandelbrot.getViewPort(), slider.getValue()));
 	}
 
 }

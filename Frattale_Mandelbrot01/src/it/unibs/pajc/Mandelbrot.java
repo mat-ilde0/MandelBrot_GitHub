@@ -8,7 +8,7 @@ import java.awt.geom.Rectangle2D;
 public class Mandelbrot extends BaseModel{
 	
 	/*
-	 * matrice che memorizza se il tal punto fa confergere la successione o no
+	 * matrice che memorizza se il tal punto fa convergere la successione o no
 	 */
 	
 	private double data[][];
@@ -27,7 +27,7 @@ public class Mandelbrot extends BaseModel{
 		data= new double[resolution][resolution]; 
 
 		
-		double dx = (view.getMaxX() - view.getMinX()) / resolution;
+		double dx = (view.getMaxX() - view.getMinX()) / resolution;   //rappresenta il passo orizzontale
 		double dy = (view.getMaxY() - view.getMinY()) / resolution;
 		
 		double xmin = view.getMinX();
@@ -39,7 +39,7 @@ public class Mandelbrot extends BaseModel{
 				data[i][j] = fMandelbrot(new Complex(j * dx + xmin, i * dy + ymin));
 			}
 		}
-		fireValuesChange();
+		fireValuesChange();  //altrimenti non viene notificato a tutti il cambiamento
 	}
 	
 	/*
@@ -48,14 +48,16 @@ public class Mandelbrot extends BaseModel{
 	 * 
 	 */
 	double fMandelbrot(Complex c) {
-		Complex f = new Complex(0, 0);
+		Complex f = new Complex(0, 0);   //corrisponde a z_0 = 0;
 
         for (int iterations = 100; iterations >= 0; iterations--) {
             f = f.sqr().sum(c);
 
             /*
-             * Se è maggiore di questo numero piccolopiccolopiccolo,
-             * allora non converge.
+             * ora mi chiedo se il nuovo valoe di f ottenuto è limitato o no -> mi chiedo se è maggiore di un certo valore piccolopiccolopiccolo 
+             * e se è così allora sicuramente non converge -> più sarà veloce nel divergere e minore sarà il valore di iterations restituito: capisco velocemente
+             * che sta divergendo.
+			 * 
              */
             if (f.module2() > 1e5) {
                 return iterations;
