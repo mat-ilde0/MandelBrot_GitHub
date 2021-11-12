@@ -2,16 +2,22 @@ package it.unibs.pajc;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
+import java.beans.PropertyChangeListener;
+import java.util.EventObject;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class MandelbrotApp {
 
 	private JFrame frame;
 	public Mandelbrot model;
 	private MandelbrotPnl pnlMandelbrot;
+	private MandelbrotController controller;
+	private JSlider slider;
 
 	/**
 	 * Launch the application.
@@ -35,15 +41,32 @@ public class MandelbrotApp {
 	public MandelbrotApp() {
 		model = new Mandelbrot();
 		model.addChangeListener(this::modelUpdated);    //si mette in ascolto degli eventi del model stesso
+		controller = new MandelbrotController(model);
 		
 		initialize();
 	}
-
+	
+		/*
+		 * questo è il metodo in cui si va ad aggiornare il mandelbrot. 
+		 */
+		public void update(EventObject e) {
+			controller.update(pnlMandelbrot.getViewPort(), slider.getValue());
+		}
+		
 	/*
 	 * Una volta che viene comunicato che i dati sono stati modificati allora viene detto alla view di ridisegnarsi.
+	 * Quando il model si è aggiornato, se sono nel thread della gestione eventi allora aggiorno il data all'interno del pannello altrimenti lo metto in coda
 	 */
 	public void modelUpdated(ChangeEvent e) {
-		pnlMandelbrot.setData(model.getData());
+		
+		Runnable task = () -> pnlMandelbrot.setData(model.getData().clone());  //così sono sicuro che il pannello lavori su una copia di dati
+		
+		if(EventQueue.isDispatchThread()) {
+			pnlMandelbrot.setData(model.getData());
+		}else {
+			SwingUtilities.invokeLater(task);
+			
+		}
 	}
 	
 	/**
@@ -60,7 +83,7 @@ public class MandelbrotApp {
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.SOUTH);
 		
-		JSlider slider = new JSlider ();
+		slider = new JSlider ();
 		slider.setMaximum(2000);
 		slider.setMinimum(50);
 		panel.add(slider);
@@ -68,19 +91,20 @@ public class MandelbrotApp {
 		JButton btnNewButton = new JButton("New Butto");
 		panel.add(btnNewButton);
 		
-		btnNewButton.addActionListener(e -> {
-			model.eval(new Rectangle2D.Double(-2, -1, 3, 2), 100);
-			//pnlMandelbrot.repaint();
-		});
+		/*
+		 * bisogna fare l'handler di un click, del movomento di un bottone e del cambiamento di una proprietà
+		 */
+		/*ActionListener action_listener = e -> model.eval(pnlMandelbrot.getViewPort(), slider.getValue());
+		ChangeListener change_listener = e ->  model.eval(pnlMandelbrot.getViewPort(), slider.getValue());
+		PropertyChangeListener prop_change_listener = e ->  model.eval(pnlMandelbrot.getViewPort(), slider.getValue());*/
 		
+		btnNewButton.addActionListener(this::update);
+	
 		
-		slider.addChangeListener(e -> {
-			model.eval(new Rectangle2D.Double(-2, -1, 3, 2), slider.getValue());
-			//pnlMandelbrot.repaint();
-		});
+		slider.addChangeListener(this::update);
 		
-		pnlMandelbrot.addPropertyChangeListener(MandelbrotPnl.VIEWPORT, e -> 
-			model.eval(pnlMandelbrot.getViewPort(), slider.getValue()));
+		pnlMandelbrot.addPropertyChangeListener(MandelbrotPnl.VIEWPORT, this::update);
 	}
+	
 
 }

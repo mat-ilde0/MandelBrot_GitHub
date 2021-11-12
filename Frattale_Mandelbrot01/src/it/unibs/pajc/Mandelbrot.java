@@ -22,9 +22,12 @@ public class Mandelbrot extends BaseModel{
 	 * Ho anche bisogno di determinare lo spazio su cui si vuole andare a lavorare -> si deve mappare una griglia, si passa anche
 	 * il rettangolo su cui si vuole fare l'analisi e per farlo si può usare un oggetto di awt : i Rectangle2D che definiscono un oggetto di
 	 * tipo rettangolare.
+	 * 
+	 * Per evitare ch edue thread eseguano lo stesso codice questo deve essere sincronizzato → non posso dichiarare eval() come un metodo sincronyzed → bisogna trovare un altro modo.
+	 * Il problema sta nel fatto che in eval si usa data[][] mentre lo si sta elaborando. Quello che si puù fare è lavorare su una copia di data[][]
 	 */
 	public void eval(Rectangle2D.Double view ,int resolution) {
-		data= new double[resolution][resolution]; 
+		double [][] data= new double[resolution][resolution]; 
 
 		
 		double dx = (view.getMaxX() - view.getMinX()) / resolution;   //rappresenta il passo orizzontale
@@ -36,10 +39,19 @@ public class Mandelbrot extends BaseModel{
 		//cicli per recuperare informazioni
 		for(int i = 0; i<resolution; i++) {
 			for(int j = 0; j<resolution; j++) {
+				//gli dico di terminare l'attuale elaborazione
+				if(Thread.currentThread().isInterrupted())
+					return;
 				data[i][j] = fMandelbrot(new Complex(j * dx + xmin, i * dy + ymin));
 			}
 		}
-		fireValuesChange();  //altrimenti non viene notificato a tutti il cambiamento
+		//solo in questo blocco vado ad aggiornare il data
+		synchronized (this) {
+			this.data = data;
+			fireValuesChange();  //altrimenti non viene notificato a tutti il cambiamento
+			
+		}
+		
 	}
 	
 	/*
